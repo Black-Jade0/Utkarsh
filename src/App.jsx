@@ -22,7 +22,7 @@ export default function App() {
         // Re-trigger image loading animation after category change
         setTimeout(() => {
             setImagesLoaded(true);
-        }, 300);
+        }, 1000);
     };
 
     return (

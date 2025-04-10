@@ -5,11 +5,11 @@ export const IntroAnimation = ({ pageInitialized, setPageInitialized, setIsLoade
         // Initial page load animation sequence
         setTimeout(() => {
             setPageInitialized(true);
-        }, 100);
+        }, 800);
 
         setTimeout(() => {
             setIsLoaded(true);
-        }, 600);
+        }, 700);
 
         setTimeout(() => {
             setImagesLoaded(true);
