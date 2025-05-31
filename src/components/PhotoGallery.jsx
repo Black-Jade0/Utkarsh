@@ -14,7 +14,8 @@ export const PhotoGallery = ({ photos, imagesLoaded, onPhotoClick }) => {
 
     // Progressive image loading with Intersection Observer
     useEffect(() => {
-        if (!imagesLoaded) return;
+        // Don't set up observer until we have photos to observe
+        if (!photos || photos.length === 0) return;
 
         const imageElements = document.querySelectorAll('[data-photo-id]');
         
@@ -46,7 +47,7 @@ export const PhotoGallery = ({ photos, imagesLoaded, onPhotoClick }) => {
                 observerRef.current.disconnect();
             }
         };
-    }, [imagesLoaded, photos]);
+    }, [photos]); // Remove imagesLoaded dependency
 
     // Handle individual image load completion
     const handleImageLoad = (photoId) => {
@@ -60,9 +61,9 @@ export const PhotoGallery = ({ photos, imagesLoaded, onPhotoClick }) => {
         setLoadedImages(prev => new Set([...prev, photoId]));
     };
 
-    // Check if an image should be visible and loaded
+    // Simplified image visibility check
     const shouldShowImage = (photoId) => {
-        return imagesLoaded && visibleImages.has(photoId);
+        return visibleImages.has(photoId) || !imagesLoaded; // Show immediately if not using progressive loading
     };
 
     const isImageLoaded = (photoId) => {
@@ -87,14 +88,14 @@ export const PhotoGallery = ({ photos, imagesLoaded, onPhotoClick }) => {
                 >
                     <div className="aspect-[4/3] relative bg-gray-100">
                         {/* Loading skeleton */}
-                        {shouldShowImage(photo.id) && !isImageLoaded(photo.id) && (
-                            <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 animate-pulse">
-                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer"></div>
+                        {!isImageLoaded(photo.id) && (
+                            <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 overflow-hidden">
+                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-shimmer transform -skew-x-12"></div>
                             </div>
                         )}
                         
-                        {/* Actual image */}
-                        {shouldShowImage(photo.id) && (
+                        {/* Actual image - Always render if imagesLoaded is true */}
+                        {imagesLoaded && (
                             <img
                                 src={photo.src}
                                 alt={photo.alt}
@@ -108,7 +109,7 @@ export const PhotoGallery = ({ photos, imagesLoaded, onPhotoClick }) => {
                         )}
                         
                         {/* Fallback for failed images */}
-                        {shouldShowImage(photo.id) && isImageLoaded(photo.id) && (
+                        {imagesLoaded && isImageLoaded(photo.id) && (
                             <div className="absolute inset-0 flex items-center justify-center text-gray-400 opacity-0 group-hover:opacity-50 transition-opacity duration-300">
                                 <Icons.Image className="w-8 h-8" />
                             </div>
@@ -134,7 +135,7 @@ export const PhotoGallery = ({ photos, imagesLoaded, onPhotoClick }) => {
                     </div>
 
                     {/* Loading indicator */}
-                    {shouldShowImage(photo.id) && !isImageLoaded(photo.id) && (
+                    {imagesLoaded && !isImageLoaded(photo.id) && (
                         <div className="absolute inset-0 flex items-center justify-center">
                             <div className="w-8 h-8 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin"></div>
                         </div>

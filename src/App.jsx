@@ -6,7 +6,7 @@ import { PhotoGallery } from "./components/PhotoGallery";
 import { SinglePhotoView } from "./components/SinglePhotoView";
 import { AboutSection } from "./components/AboutSection";
 import { Footer } from "./components/Footer";
-import { GlobalStyle } from "./components/GlobalStyle";
+import { GlobalStyle } from "./components/GobalStyle";
 
 export default function App() {
     const [activeCategory, setActiveCategory] = useState("portrait");
@@ -165,7 +165,9 @@ export default function App() {
             {/* Footer Component */}
             <Footer />
 
-            <GlobalStyle />
+            {/* Global Styles */}
+            {/* Global Styles - Load once on mount */}
+            {pageInitialized && <GlobalStyle />}
         </div>
     );
 }
