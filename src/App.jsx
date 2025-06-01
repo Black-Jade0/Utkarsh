@@ -13,37 +13,25 @@ export default function App() {
     const [selectedPhoto, setSelectedPhoto] = useState(null);
     const [isLoaded, setIsLoaded] = useState(false);
     const [pageInitialized, setPageInitialized] = useState(false);
-    const [imagesLoaded, setImagesLoaded] = useState(false);
     
-    // Add transition states to prevent page mixing
+    // Simplified state management - remove imagesLoaded complexity
     const [isTransitioning, setIsTransitioning] = useState(false);
-    const [previousCategory, setPreviousCategory] = useState(null);
 
-    // Debounced category change to prevent rapid switching
+    // Simplified category change handler
     const handleCategoryChange = useCallback((category) => {
         if (category === activeCategory || isTransitioning) return;
 
         setIsTransitioning(true);
-        setPreviousCategory(activeCategory);
+        setSelectedPhoto(null); // Clear any selected photo
         
-        // First, hide current content
-        setImagesLoaded(false);
-        setSelectedPhoto(null);
-
-        // Brief delay to allow fade out
+        // Short transition delay
         setTimeout(() => {
             setActiveCategory(category);
-            
-            // Longer delay for new content to appear
-            setTimeout(() => {
-                setImagesLoaded(true);
-                setIsTransitioning(false);
-                setPreviousCategory(null);
-            }, category === "about" ? 300 : 800); // Shorter delay for about page
-        }, 200);
+            setIsTransitioning(false);
+        }, 300);
     }, [activeCategory, isTransitioning]);
 
-    // Handle photo selection with smooth transitions
+    // Handle photo selection
     const handlePhotoClick = useCallback((photo) => {
         if (isTransitioning) return;
         setSelectedPhoto(photo);
@@ -52,35 +40,17 @@ export default function App() {
     // Handle back from single photo view
     const handleBackFromPhoto = useCallback(() => {
         setSelectedPhoto(null);
-        // Re-trigger image animations when returning to gallery
-        setTimeout(() => {
-            setImagesLoaded(true);
-        }, 100);
     }, []);
 
-    // Reset states when component mounts
+    // Initial load sequence - simplified
     useEffect(() => {
-        // Initial load sequence
-        if (pageInitialized && !imagesLoaded) {
+        if (pageInitialized && !isLoaded) {
             const timer = setTimeout(() => {
-                setImagesLoaded(true);
+                setIsLoaded(true);
             }, 1000);
             return () => clearTimeout(timer);
         }
-    }, [pageInitialized, imagesLoaded]);
-
-    // Prevent scroll restoration during transitions
-    useEffect(() => {
-        if (isTransitioning) {
-            document.body.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = 'unset';
-        }
-
-        return () => {
-            document.body.style.overflow = 'unset';
-        };
-    }, [isTransitioning]);
+    }, [pageInitialized, isLoaded]);
 
     return (
         <div className="font-sans min-h-screen bg-white text-gray-900 relative">
@@ -89,7 +59,6 @@ export default function App() {
                 pageInitialized={pageInitialized}
                 setPageInitialized={setPageInitialized}
                 setIsLoaded={setIsLoaded}
-                setImagesLoaded={setImagesLoaded}
             />
 
             {/* Header Component */}
@@ -122,7 +91,7 @@ export default function App() {
                             }`}>
                                 <PhotoGallery
                                     photos={photoCategories[activeCategory] || []}
-                                    imagesLoaded={imagesLoaded && !isTransitioning}
+                                    imagesLoaded={pageInitialized && !isTransitioning} // Simplified logic
                                     onPhotoClick={handlePhotoClick}
                                 />
                             </div>
@@ -150,22 +119,11 @@ export default function App() {
                         <AboutSection isLoaded={isLoaded && !isTransitioning} />
                     </div>
                 )}
-
-                {/* Loading State for Category Changes */}
-                {isTransitioning && previousCategory && (
-                    <div className="flex items-center justify-center py-20">
-                        <div className="text-center">
-                            <div className="w-8 h-8 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin mx-auto mb-4"></div>
-                            <p className="text-gray-500 text-sm">Loading {activeCategory}...</p>
-                        </div>
-                    </div>
-                )}
             </main>
 
             {/* Footer Component */}
             <Footer />
 
-            {/* Global Styles */}
             {/* Global Styles - Load once on mount */}
             {pageInitialized && <GlobalStyle />}
         </div>
